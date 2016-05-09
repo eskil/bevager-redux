@@ -16,18 +16,28 @@ By exporting bevager data (from the rendered table) and rendering into html ours
 As made apparent by the `requirements.txt` file, this app relies on underlying technologies of `MongoDB`, and `redis` as its primary datastore, and celery queue, respectively.
 Installation of these dependencies is left as an exercise to the user.
 
+## MacOS
+
+```
+brew install redis
+brew install mongodb
+redis-server &
+mongod --dbpath .
+```
+
 ## Usage
 A top-level `credentials.yaml` file is expected to provide `username: password` mapping for use by the `BevagerClient` class in `bevager_cli.py`.
 
 It is recommended to install dependencies within a virtualenvironment:
 ```
-dnathe4th@~/bevager-redux: mkvirtualenv bevager
-(bevager) dnathe4th@~/bevager-redux: pip install -r requirements.txt
+virtualenv env
+. ./env/bin/activate
+pip install -r requirements.txt
 ```
 
 The app can be started by invoking `python` with the `app.py` file as its argument:
 ```
-(bevager) dnathe4th@~/bevager-redux: python app.py
+python app.py
  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
 ```
 
@@ -43,6 +53,12 @@ Once the app and celery workers are up and running, the initial dump of data can
 >>> load_rums.delay(user='<USER NAME PRESENT IN CREDENTIALS.YAML>')
 ```
 This will trigger a single celery task to log into bevager and load the table of data, and then triggers independent celery tasks to upsert each rum listed into the datastore.
+
+## Dump to CSV
+
+```
+mongoexport --db bevager --collection rums --fields country,name,notes,signed,price,available --out rums.csv --type=csv
+```
 
 ## Assumptions
 Since the data import is done via [beautifulsoup] parsing of the html table on bevager.com, significant changes to the html will disrupt data import.
